@@ -18,10 +18,11 @@ if (typeof window !== "undefined") {
   });
 }
 
-// Icône personnalisée moderne - style épuré avec nouvelles couleurs
-const createCustomIcon = (isSelected: boolean) => {
+// Icône personnalisée : isSelected = focus, isDone = validé (coché)
+const createCustomIcon = (isSelected: boolean, isDone: boolean) => {
   const size = isSelected ? 40 : 32;
-  const color = isSelected ? "#10b981" : "#f97316";
+  const color = isDone ? "#10b981" : isSelected ? "#10b981" : "#f97316";
+  const borderWidth = isDone ? 4 : 3;
   
   return L.divIcon({
     className: "custom-marker",
@@ -29,9 +30,9 @@ const createCustomIcon = (isSelected: boolean) => {
       width: ${size}px;
       height: ${size}px;
       background: ${color};
-      border: 3px solid white;
+      border: ${borderWidth}px solid white;
       border-radius: 50%;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.25), 0 0 0 3px ${color}30;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.25), 0 0 0 3px ${color}40;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       display: flex;
       align-items: center;
@@ -48,7 +49,13 @@ const createCustomIcon = (isSelected: boolean) => {
         background: white;
         border-radius: 50%;
         box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
-      "></div>
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: ${size * 0.35}px;
+        font-weight: bold;
+        color: #10b981;
+      ">${isDone ? '✓' : ''}</div>
     </div>`,
     iconSize: [size, size],
     iconAnchor: [size / 2, size / 2],
@@ -143,11 +150,13 @@ export default function MapComponent({
     onSelectRestaurant(restaurant);
   };
 
-  // Positions pour la polyline : restos cochés dans l'ordre
-  const donePositions: [number, number][] = doneIds
+  // Positions pour la polyline : restos cochés dans l'ordre (pour le tracé)
+  const donePositions: L.LatLngTuple[] = doneIds
     .map((id) => restaurants.find((r) => r.id === id))
     .filter((r): r is Restaurant => r != null)
-    .map((r) => [r.lat, r.lon] as [number, number]);
+    .map((r) => [r.lat, r.lon] as L.LatLngTuple);
+
+  const polylineKey = donePositions.map((p) => p.join(",")).join("|");
 
   return (
     <div className="w-full h-full relative bg-gray-50">
@@ -197,32 +206,50 @@ export default function MapComponent({
           maxZoom={20}
         />
         {donePositions.length >= 2 && (
-          <Polyline
-            positions={donePositions}
-            pathOptions={{
-              color: "#10b981",
-              weight: 5,
-              opacity: 0.9,
-            }}
-          />
+          <>
+            <Polyline
+              key={`${polylineKey}-stroke`}
+              positions={donePositions}
+              pathOptions={{
+                color: "white",
+                weight: 10,
+                opacity: 0.9,
+                lineCap: "round",
+                lineJoin: "round",
+              }}
+            />
+            <Polyline
+              key={polylineKey}
+              positions={donePositions}
+              pathOptions={{
+                color: "#059669",
+                weight: 6,
+                opacity: 1,
+                lineCap: "round",
+                lineJoin: "round",
+              }}
+            />
+          </>
         )}
-        {restaurants.map((restaurant) => (
+        {restaurants.map((restaurant) => {
+          const isDone = doneIds.includes(restaurant.id);
+          return (
           <Marker
             key={restaurant.id}
             position={[restaurant.lat, restaurant.lon]}
-            icon={createCustomIcon(selectedRestaurant?.id === restaurant.id)}
+            icon={createCustomIcon(selectedRestaurant?.id === restaurant.id, isDone)}
             eventHandlers={{
               click: () => handleMarkerClick(restaurant),
               mouseover: (e) => {
                 if (!isMobile) {
                   const marker = e.target;
-                  marker.setIcon(createCustomIcon(true));
+                  marker.setIcon(createCustomIcon(true, isDone));
                 }
               },
               mouseout: (e) => {
                 if (!isMobile && selectedRestaurant?.id !== restaurant.id) {
                   const marker = e.target;
-                  marker.setIcon(createCustomIcon(false));
+                  marker.setIcon(createCustomIcon(false, isDone));
                 }
               },
             }}
@@ -242,7 +269,8 @@ export default function MapComponent({
               </Popup>
             )}
           </Marker>
-        ))}
+          );
+        })}
         <MapUpdater selectedRestaurant={selectedRestaurant} />
       </MapContainer>
     </div>
