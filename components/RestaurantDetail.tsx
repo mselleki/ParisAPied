@@ -15,13 +15,21 @@ export default function RestaurantDetail({
 }: RestaurantDetailProps) {
   useEffect(() => {
     if (restaurant) {
+      // Lock body scroll sur iOS
+      const scrollY = window.scrollY;
+      document.body.style.position = "fixed";
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = "100%";
       document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
+      
+      return () => {
+        document.body.style.position = "";
+        document.body.style.top = "";
+        document.body.style.width = "";
+        document.body.style.overflow = "";
+        window.scrollTo(0, scrollY);
+      };
     }
-    return () => {
-      document.body.style.overflow = "unset";
-    };
   }, [restaurant]);
 
   return (
@@ -34,7 +42,17 @@ export default function RestaurantDetail({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100]"
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9998]"
+            style={{
+              // S'assurer que le backdrop couvre tout l'écran sur iOS
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              width: "100%",
+              height: "100%",
+            }}
           />
 
           {/* Modal - Bottom sheet sur mobile, centrée sur desktop */}
@@ -43,10 +61,13 @@ export default function RestaurantDetail({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: "100%" }}
             transition={{ type: "spring", damping: 30, stiffness: 300 }}
-            className="fixed bottom-0 left-0 right-0 md:bottom-auto md:left-1/2 md:right-auto md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 w-full md:w-auto md:max-w-2xl max-h-[85vh] md:max-h-[90vh] bg-white rounded-t-3xl md:rounded-2xl shadow-2xl z-[101] overflow-y-auto border-t md:border border-gray-200"
+            className="fixed bottom-0 left-0 right-0 md:bottom-auto md:left-1/2 md:right-auto md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 w-full md:w-auto md:max-w-2xl bg-white rounded-t-3xl md:rounded-2xl shadow-2xl z-[9999] overflow-y-auto border-t md:border border-gray-200"
             style={{
-              // S'assurer que la modale est toujours visible
-              maxHeight: "85vh",
+              // Utiliser dvh (dynamic viewport height) si supporté, sinon vh
+              maxHeight: "calc(100dvh - env(safe-area-inset-bottom))",
+              paddingBottom: "env(safe-area-inset-bottom)",
+              // S'assurer que la modale est toujours visible sur iOS
+              WebkitOverflowScrolling: "touch",
             }}
           >
             {/* Handle bar pour mobile */}
@@ -54,7 +75,7 @@ export default function RestaurantDetail({
               <div className="w-12 h-1.5 bg-gray-300 rounded-full" />
             </div>
 
-            <div className="p-6 md:p-8">
+            <div className="p-6 md:p-8 pb-safe">
               {/* Header */}
               <div className="flex items-start justify-between mb-6">
                 <div className="flex-1 min-w-0 pr-4">
@@ -65,8 +86,11 @@ export default function RestaurantDetail({
                 </div>
                 <button
                   onClick={onClose}
-                  className="flex-shrink-0 w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors text-gray-600 hover:text-gray-900"
+                  className="flex-shrink-0 w-10 h-10 rounded-full bg-gray-100 active:bg-gray-200 flex items-center justify-center transition-colors text-gray-600 active:text-gray-900 touch-manipulation"
                   aria-label="Fermer"
+                  style={{
+                    WebkitTapHighlightColor: "transparent",
+                  }}
                 >
                   ✕
                 </button>
@@ -123,7 +147,10 @@ export default function RestaurantDetail({
                       href={restaurant.site}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-1 px-5 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium shadow-lg text-center"
+                      className="flex-1 px-5 py-3 bg-emerald-600 text-white rounded-lg active:bg-emerald-700 transition-colors font-medium shadow-lg text-center touch-manipulation"
+                      style={{
+                        WebkitTapHighlightColor: "transparent",
+                      }}
                     >
                       🌐 Site web
                     </a>
@@ -133,7 +160,10 @@ export default function RestaurantDetail({
                       href={`https://instagram.com/${restaurant.instagram.replace("@", "")}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-1 px-5 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg hover:from-orange-600 hover:to-orange-700 transition-colors font-medium shadow-lg text-center"
+                      className="flex-1 px-5 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg active:from-orange-600 active:to-orange-700 transition-colors font-medium shadow-lg text-center touch-manipulation"
+                      style={{
+                        WebkitTapHighlightColor: "transparent",
+                      }}
                     >
                       📸 Instagram
                     </a>
