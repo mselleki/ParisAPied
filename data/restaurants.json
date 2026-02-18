@@ -1,0 +1,32 @@
+{
+  "restaurants": [
+    {
+      "id": 1,
+      "nom": "Shinko",
+      "adresse": "21 rue Vignon, 75008 Paris",
+      "type": "restaurant",
+      "note": null,
+      "horaires": null,
+      "site": null,
+      "instagram": null,
+      "photo": null,
+      "quartier": "Madeleine",
+      "lat": 48.8715886,
+      "lon": 2.3262717
+    },
+    {
+      "id": 2,
+      "nom": "Restaurant Ella",
+      "adresse": "14 Rue du Faubourg Saint-Denis, 75010 Paris",
+      "type": "restaurant",
+      "note": null,
+      "horaires": null,
+      "site": null,
+      "instagram": null,
+      "photo": null,
+      "quartier": "Faubourg Saint-Denis",
+      "lat": 48.8704480,
+      "lon": 2.3531286
+    }
+  ]
+}
