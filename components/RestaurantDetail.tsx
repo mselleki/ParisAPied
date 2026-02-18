@@ -2,7 +2,9 @@
 
 import { Restaurant } from "@/types/restaurant";
 import { motion, AnimatePresence } from "framer-motion";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
+import { createPortal } from "react-dom";
 
 interface RestaurantDetailProps {
   restaurant: Restaurant | null;
@@ -13,6 +15,12 @@ export default function RestaurantDetail({
   restaurant,
   onClose,
 }: RestaurantDetailProps) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   useEffect(() => {
     if (restaurant) {
       // Lock body scroll sur iOS
@@ -32,7 +40,7 @@ export default function RestaurantDetail({
     }
   }, [restaurant]);
 
-  return (
+  const modalContent = (
     <AnimatePresence>
       {restaurant && (
         <>
@@ -42,16 +50,16 @@ export default function RestaurantDetail({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9998]"
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm"
             style={{
-              // S'assurer que le backdrop couvre tout l'écran sur iOS
               position: "fixed",
               top: 0,
               left: 0,
               right: 0,
               bottom: 0,
-              width: "100%",
-              height: "100%",
+              width: "100vw",
+              height: "100vh",
+              zIndex: 99998,
             }}
           />
 
@@ -61,13 +69,13 @@ export default function RestaurantDetail({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: "100%" }}
             transition={{ type: "spring", damping: 30, stiffness: 300 }}
-            className="fixed bottom-0 left-0 right-0 md:bottom-auto md:left-1/2 md:right-auto md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 w-full md:w-auto md:max-w-2xl bg-white rounded-t-3xl md:rounded-2xl shadow-2xl z-[9999] overflow-y-auto border-t md:border border-gray-200"
+            className="fixed bottom-0 left-0 right-0 md:bottom-auto md:left-1/2 md:right-auto md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 w-full md:w-auto md:max-w-2xl bg-white rounded-t-3xl md:rounded-2xl shadow-2xl overflow-y-auto border-t md:border border-gray-200"
             style={{
-              // Utiliser dvh (dynamic viewport height) si supporté, sinon vh
               maxHeight: "calc(100dvh - env(safe-area-inset-bottom))",
               paddingBottom: "env(safe-area-inset-bottom)",
-              // S'assurer que la modale est toujours visible sur iOS
               WebkitOverflowScrolling: "touch",
+              zIndex: 99999,
+              position: "fixed",
             }}
           >
             {/* Handle bar pour mobile */}
@@ -176,4 +184,9 @@ export default function RestaurantDetail({
       )}
     </AnimatePresence>
   );
+
+  // Utiliser un portail React pour rendre la modale en dehors du DOM de la carte
+  if (!mounted) return null;
+  
+  return createPortal(modalContent, document.body);
 }

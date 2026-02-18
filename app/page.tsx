@@ -17,13 +17,17 @@ export default function Home() {
   const restaurants = restaurantsData.restaurants as Restaurant[];
 
   const handleSelectRestaurant = (restaurant: Restaurant) => {
+    // Toujours réinitialiser et sélectionner le nouveau restaurant
     setSelectedRestaurant(restaurant);
     setShowDetail(true);
   };
 
   const handleCloseDetail = () => {
     setShowDetail(false);
-    setTimeout(() => setSelectedRestaurant(null), 300);
+    // Réinitialiser la sélection après l'animation de fermeture
+    setTimeout(() => {
+      setSelectedRestaurant(null);
+    }, 300);
   };
 
   return (
@@ -144,7 +148,7 @@ export default function Home() {
         </AnimatePresence>
       </div>
 
-      {/* Restaurant Detail Modal */}
+      {/* Restaurant Detail Modal - Utilise un portail pour être au-dessus de tout */}
       <RestaurantDetail
         restaurant={showDetail ? selectedRestaurant : null}
         onClose={handleCloseDetail}

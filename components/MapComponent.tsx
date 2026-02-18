@@ -40,6 +40,7 @@ const createCustomIcon = (isSelected: boolean) => {
       transform: ${isSelected ? 'scale(1.1)' : 'scale(1)'};
       touch-action: manipulation;
       -webkit-tap-highlight-color: transparent;
+      pointer-events: auto;
     ">
       <div style="
         width: ${size * 0.5}px;
@@ -136,16 +137,10 @@ export default function MapComponent({
 
   const currentStyle = mapStyles[mapStyle];
 
-  const handleMarkerClick = (restaurant: Restaurant, e: L.LeafletMouseEvent) => {
-    // Empêcher le popup Leaflet de s'afficher sur mobile
-    if (isMobile) {
-      e.originalEvent?.preventDefault?.();
-      e.originalEvent?.stopPropagation?.();
-    }
-    // Petit délai pour s'assurer que l'événement est bien traité
-    setTimeout(() => {
-      onSelectRestaurant(restaurant);
-    }, isMobile ? 100 : 0);
+  const handleMarkerClick = (restaurant: Restaurant) => {
+    // Toujours appeler onSelectRestaurant, même si c'est le même restaurant
+    // Cela garantit que la modale s'ouvre
+    onSelectRestaurant(restaurant);
   };
 
   return (
@@ -188,7 +183,7 @@ export default function MapComponent({
         className="z-0 map-modern"
         scrollWheelZoom={true}
         zoomControl={true}
-        key={mapStyle} // Force le re-render quand le style change
+        key={mapStyle}
       >
         <TileLayer
           attribution={currentStyle.attribution}
@@ -201,12 +196,11 @@ export default function MapComponent({
             position={[restaurant.lat, restaurant.lon]}
             icon={createCustomIcon(selectedRestaurant?.id === restaurant.id)}
             eventHandlers={{
-              click: (e) => handleMarkerClick(restaurant, e),
-              // Sur mobile, utiliser touchstart pour une meilleure réactivité
-              touchstart: (e) => {
+              click: () => handleMarkerClick(restaurant),
+              // Sur mobile, utiliser aussi touchstart
+              touchstart: () => {
                 if (isMobile) {
-                  e.originalEvent?.preventDefault?.();
-                  handleMarkerClick(restaurant, e as any);
+                  handleMarkerClick(restaurant);
                 }
               },
               mouseover: (e) => {
@@ -222,6 +216,8 @@ export default function MapComponent({
                 }
               },
             }}
+            // Désactiver le popup sur mobile
+            {...(isMobile ? { interactive: true } : {})}
           >
             {/* Popup désactivé sur mobile, affiché sur desktop */}
             {!isMobile && (
