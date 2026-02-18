@@ -8,11 +8,15 @@ import { createPortal } from "react-dom";
 interface RestaurantDetailProps {
   restaurant: Restaurant | null;
   onClose: () => void;
+  isDone: boolean;
+  onToggleDone: () => void;
 }
 
 export default function RestaurantDetail({
   restaurant,
   onClose,
+  isDone,
+  onToggleDone,
 }: RestaurantDetailProps) {
   const [mounted, setMounted] = useState(false);
 
@@ -102,6 +106,20 @@ export default function RestaurantDetail({
                   ✕
                 </button>
               </div>
+
+              {/* Marquer comme fait */}
+              <button
+                type="button"
+                onClick={onToggleDone}
+                className={`w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 font-medium transition-all mb-6 touch-manipulation ${
+                  isDone
+                    ? "bg-emerald-100 border-emerald-500 text-emerald-800"
+                    : "bg-gray-50 border-gray-200 text-gray-700 hover:border-emerald-400 hover:bg-emerald-50"
+                }`}
+                style={{ WebkitTapHighlightColor: "transparent" }}
+              >
+                {isDone ? "✓ Fait" : "Marquer comme fait"}
+              </button>
 
               {/* Content */}
               <div className="space-y-6">

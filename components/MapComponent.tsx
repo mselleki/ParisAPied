@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from "react-leaflet";
 import { Restaurant } from "@/types/restaurant";
 import L from "leaflet";
 
@@ -95,6 +95,7 @@ interface MapComponentProps {
   restaurants: Restaurant[];
   selectedRestaurant: Restaurant | null;
   onSelectRestaurant: (restaurant: Restaurant) => void;
+  doneIds: number[];
 }
 
 function MapUpdater({
@@ -120,6 +121,7 @@ export default function MapComponent({
   restaurants,
   selectedRestaurant,
   onSelectRestaurant,
+  doneIds,
 }: MapComponentProps) {
   const center: [number, number] = [48.8566, 2.3522];
   const [mapStyle, setMapStyle] = useState<MapStyleKey>("positron");
@@ -138,10 +140,14 @@ export default function MapComponent({
   const currentStyle = mapStyles[mapStyle];
 
   const handleMarkerClick = (restaurant: Restaurant) => {
-    // Toujours appeler onSelectRestaurant, même si c'est le même restaurant
-    // Cela garantit que la modale s'ouvre
     onSelectRestaurant(restaurant);
   };
+
+  // Positions pour la polyline : restos cochés dans l'ordre
+  const donePositions: [number, number][] = doneIds
+    .map((id) => restaurants.find((r) => r.id === id))
+    .filter((r): r is Restaurant => r != null)
+    .map((r) => [r.lat, r.lon] as [number, number]);
 
   return (
     <div className="w-full h-full relative bg-gray-50">
@@ -190,6 +196,16 @@ export default function MapComponent({
           url={currentStyle.url}
           maxZoom={20}
         />
+        {donePositions.length >= 2 && (
+          <Polyline
+            positions={donePositions}
+            pathOptions={{
+              color: "#10b981",
+              weight: 5,
+              opacity: 0.9,
+            }}
+          />
+        )}
         {restaurants.map((restaurant) => (
           <Marker
             key={restaurant.id}

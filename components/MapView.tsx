@@ -21,18 +21,21 @@ interface MapViewProps {
   restaurants: Restaurant[];
   selectedRestaurant: Restaurant | null;
   onSelectRestaurant: (restaurant: Restaurant) => void;
+  doneIds: number[];
 }
 
 export default function MapView({
   restaurants,
   selectedRestaurant,
   onSelectRestaurant,
+  doneIds,
 }: MapViewProps) {
   return (
     <MapComponent
       restaurants={restaurants}
       selectedRestaurant={selectedRestaurant}
       onSelectRestaurant={onSelectRestaurant}
+      doneIds={doneIds}
     />
   );
 }

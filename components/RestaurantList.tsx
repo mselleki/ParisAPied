@@ -9,12 +9,18 @@ interface RestaurantListProps {
   restaurants: Restaurant[];
   selectedRestaurant: Restaurant | null;
   onSelectRestaurant: (restaurant: Restaurant) => void;
+  doneIds: number[];
+  onToggleDone: (restaurantId: number) => void;
+  isDone: (restaurantId: number) => boolean;
 }
 
 export default function RestaurantList({
   restaurants,
   selectedRestaurant,
   onSelectRestaurant,
+  doneIds,
+  onToggleDone,
+  isDone,
 }: RestaurantListProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState<string>("all");
@@ -128,6 +134,11 @@ export default function RestaurantList({
                 isSelected={selectedRestaurant?.id === restaurant.id}
                 onClick={() => onSelectRestaurant(restaurant)}
                 index={index}
+                isDone={isDone(restaurant.id)}
+                onToggleDone={(e) => {
+                  e.stopPropagation();
+                  onToggleDone(restaurant.id);
+                }}
               />
             ))
           )}

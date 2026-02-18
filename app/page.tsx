@@ -7,12 +7,14 @@ import MapView from "@/components/MapView";
 import RestaurantDetail from "@/components/RestaurantDetail";
 import restaurantsData from "@/data/restaurants.json";
 import { motion, AnimatePresence } from "framer-motion";
+import { useDoneRestaurants } from "@/hooks/useDoneRestaurants";
 
 export default function Home() {
   const [viewMode, setViewMode] = useState<"list" | "map" | "split">("split");
   const [selectedRestaurant, setSelectedRestaurant] =
     useState<Restaurant | null>(null);
   const [showDetail, setShowDetail] = useState(false);
+  const { doneIds, toggleDone, isDone } = useDoneRestaurants();
 
   const restaurants = restaurantsData.restaurants as Restaurant[];
 
@@ -99,6 +101,9 @@ export default function Home() {
                 restaurants={restaurants}
                 selectedRestaurant={selectedRestaurant}
                 onSelectRestaurant={handleSelectRestaurant}
+                doneIds={doneIds}
+                onToggleDone={toggleDone}
+                isDone={isDone}
               />
             </motion.div>
           )}
@@ -116,6 +121,7 @@ export default function Home() {
                 restaurants={restaurants}
                 selectedRestaurant={selectedRestaurant}
                 onSelectRestaurant={handleSelectRestaurant}
+                doneIds={doneIds}
               />
             </motion.div>
           )}
@@ -134,6 +140,9 @@ export default function Home() {
                   restaurants={restaurants}
                   selectedRestaurant={selectedRestaurant}
                   onSelectRestaurant={handleSelectRestaurant}
+                  doneIds={doneIds}
+                  onToggleDone={toggleDone}
+                  isDone={isDone}
                 />
               </div>
               <div className="w-full md:w-1/2 overflow-hidden">
@@ -141,6 +150,7 @@ export default function Home() {
                   restaurants={restaurants}
                   selectedRestaurant={selectedRestaurant}
                   onSelectRestaurant={handleSelectRestaurant}
+                  doneIds={doneIds}
                 />
               </div>
             </motion.div>
@@ -152,6 +162,8 @@ export default function Home() {
       <RestaurantDetail
         restaurant={showDetail ? selectedRestaurant : null}
         onClose={handleCloseDetail}
+        isDone={selectedRestaurant ? isDone(selectedRestaurant.id) : false}
+        onToggleDone={selectedRestaurant ? () => toggleDone(selectedRestaurant.id) : () => {}}
       />
     </main>
   );
