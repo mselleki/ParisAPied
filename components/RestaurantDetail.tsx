@@ -4,7 +4,6 @@ import { Restaurant } from "@/types/restaurant";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { createPortal } from "react-dom";
 
 interface RestaurantDetailProps {
   restaurant: Restaurant | null;
