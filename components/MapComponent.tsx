@@ -197,12 +197,6 @@ export default function MapComponent({
             icon={createCustomIcon(selectedRestaurant?.id === restaurant.id)}
             eventHandlers={{
               click: () => handleMarkerClick(restaurant),
-              // Sur mobile, utiliser aussi touchstart
-              touchstart: () => {
-                if (isMobile) {
-                  handleMarkerClick(restaurant);
-                }
-              },
               mouseover: (e) => {
                 if (!isMobile) {
                   const marker = e.target;
