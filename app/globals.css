@@ -201,3 +201,18 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #4b5563;
 }
+
+/* Fix pour les modales sur mobile */
+@media (max-width: 768px) {
+  /* Empêcher le scroll du body quand la modale est ouverte */
+  body.modal-open {
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+  }
+  
+  /* S'assurer que la modale est toujours visible */
+  [class*="z-\[101\]"] {
+    z-index: 9999 !important;
+  }
+}
