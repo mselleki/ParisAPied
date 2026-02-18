@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from "react-leaflet";
 import { Restaurant } from "@/types/restaurant";
 import L from "leaflet";
+import { fetchWalkingRoute } from "@/lib/osrm";
 
 // Fix pour les icônes Leaflet avec Next.js
 if (typeof window !== "undefined") {
@@ -150,13 +151,38 @@ export default function MapComponent({
     onSelectRestaurant(restaurant);
   };
 
-  // Positions pour la polyline : restos cochés dans l'ordre (pour le tracé)
-  const donePositions: L.LatLngTuple[] = doneIds
-    .map((id) => restaurants.find((r) => r.id === id))
-    .filter((r): r is Restaurant => r != null)
-    .map((r) => [r.lat, r.lon] as L.LatLngTuple);
+  // Itinéraire piéton : toujours relier tous les restos (ordre de la liste)
+  const [routePositions, setRoutePositions] = useState<L.LatLngTuple[] | null>(null);
 
-  const polylineKey = donePositions.map((p) => p.join(",")).join("|");
+  const waypointsKey = restaurants
+    .map((r) => `${r.lat.toFixed(5)},${r.lon.toFixed(5)}`)
+    .join("|");
+
+  useEffect(() => {
+    if (restaurants.length < 2) {
+      setRoutePositions(null);
+      return;
+    }
+    const waypoints = restaurants.map((r) => [r.lat, r.lon] as [number, number]);
+    let cancelled = false;
+    fetchWalkingRoute(waypoints).then((positions) => {
+      if (!cancelled) {
+        setRoutePositions(positions ?? waypoints);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [waypointsKey, restaurants.length]);
+
+  // Fallback ligne droite si pas encore de route ou 1 seul point
+  const linePositions: L.LatLngTuple[] =
+    routePositions && routePositions.length >= 2
+      ? routePositions
+      : restaurants.length >= 2
+        ? restaurants.map((r) => [r.lat, r.lon] as L.LatLngTuple)
+        : [];
+  const polylineKey = linePositions.map((p) => p.join(",")).join("|");
 
   return (
     <div className="w-full h-full relative bg-gray-50">
@@ -205,11 +231,11 @@ export default function MapComponent({
           url={currentStyle.url}
           maxZoom={20}
         />
-        {donePositions.length >= 2 && (
+        {linePositions.length >= 2 && (
           <>
             <Polyline
               key={`${polylineKey}-stroke`}
-              positions={donePositions}
+              positions={linePositions}
               pathOptions={{
                 color: "white",
                 weight: 10,
@@ -220,7 +246,7 @@ export default function MapComponent({
             />
             <Polyline
               key={polylineKey}
-              positions={donePositions}
+              positions={linePositions}
               pathOptions={{
                 color: "#059669",
                 weight: 6,
