@@ -182,7 +182,9 @@ export default function MapComponent({
       : restaurants.length >= 2
         ? restaurants.map((r) => [r.lat, r.lon] as L.LatLngTuple)
         : [];
-  const polylineKey = linePositions.map((p) => p.join(",")).join("|");
+  const routeComplete = doneIds.length >= 2;
+  const routeColor = routeComplete ? "#059669" : "#f97316";
+  const polylineKey = linePositions.map((p) => p.join(",")).join("|") + routeColor;
 
   return (
     <div className="w-full h-full relative bg-gray-50">
@@ -248,7 +250,7 @@ export default function MapComponent({
               key={polylineKey}
               positions={linePositions}
               pathOptions={{
-                color: "#059669",
+                color: routeColor,
                 weight: 6,
                 opacity: 1,
                 lineCap: "round",
