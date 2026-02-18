@@ -58,7 +58,7 @@ export default function RestaurantList({
         <div className="relative">
           <input
             type="text"
-            placeholder="🔍 Rechercher un restaurant..."
+            placeholder="Rechercher un restaurant..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full px-4 py-3.5 pl-12 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all bg-white text-gray-900 placeholder:text-gray-400 text-base shadow-sm"

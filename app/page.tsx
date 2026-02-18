@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Restaurant } from "@/types/restaurant";
 import RestaurantList from "@/components/RestaurantList";
 import MapView from "@/components/MapView";
@@ -41,11 +42,19 @@ export default function Home() {
         className="bg-gradient-to-r from-emerald-600 via-emerald-700 to-orange-600 text-white p-5 md:p-6 shadow-lg relative overflow-hidden"
       >
         <div className="absolute inset-0 bg-black/10" />
-        <div className="relative z-10">
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">Paris à Pied</h1>
-          <p className="text-base md:text-lg opacity-90">
-            Tour des petites adresses parisiennes
-          </p>
+        <div className="relative z-10 flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-3xl md:text-4xl font-bold mb-2">Paris à Pied</h1>
+            <p className="text-base md:text-lg opacity-90">
+              Tour des petites adresses parisiennes
+            </p>
+          </div>
+          <Link
+            href="/classement"
+            className="flex-shrink-0 px-4 py-2 rounded-xl bg-white/20 hover:bg-white/30 text-white font-medium text-sm transition-colors"
+          >
+            🏆 Classement
+          </Link>
         </div>
       </motion.header>
 
