@@ -219,14 +219,27 @@ body {
     }
   }
   
-  /* S'assurer que la modale est toujours visible */
+  /* S'assurer que la modale est toujours visible - au-dessus de Leaflet */
   [class*="z-\[9999\]"] {
-    z-index: 9999 !important;
+    z-index: 99999 !important;
+    position: fixed !important;
   }
   
   /* Améliorer le scroll sur iOS */
   .overflow-y-auto {
     -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Désactiver les popups Leaflet sur mobile */
+  .leaflet-popup {
+    display: none !important;
+  }
+  
+  /* S'assurer que les marqueurs sont cliquables */
+  .leaflet-marker-icon {
+    cursor: pointer !important;
+    touch-action: manipulation !important;
+    -webkit-tap-highlight-color: transparent !important;
   }
 }
 

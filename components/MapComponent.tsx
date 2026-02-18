@@ -38,6 +38,8 @@ const createCustomIcon = (isSelected: boolean) => {
       justify-content: center;
       cursor: pointer;
       transform: ${isSelected ? 'scale(1.1)' : 'scale(1)'};
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
     ">
       <div style="
         width: ${size * 0.5}px;
@@ -121,8 +123,30 @@ export default function MapComponent({
   const center: [number, number] = [48.8566, 2.3522];
   const [mapStyle, setMapStyle] = useState<MapStyleKey>("positron");
   const [showStyleSelector, setShowStyleSelector] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768 || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   const currentStyle = mapStyles[mapStyle];
+
+  const handleMarkerClick = (restaurant: Restaurant, e: L.LeafletMouseEvent) => {
+    // Empêcher le popup Leaflet de s'afficher sur mobile
+    if (isMobile) {
+      e.originalEvent?.preventDefault?.();
+      e.originalEvent?.stopPropagation?.();
+    }
+    // Petit délai pour s'assurer que l'événement est bien traité
+    setTimeout(() => {
+      onSelectRestaurant(restaurant);
+    }, isMobile ? 100 : 0);
+  };
 
   return (
     <div className="w-full h-full relative bg-gray-50">
@@ -177,28 +201,40 @@ export default function MapComponent({
             position={[restaurant.lat, restaurant.lon]}
             icon={createCustomIcon(selectedRestaurant?.id === restaurant.id)}
             eventHandlers={{
-              click: () => onSelectRestaurant(restaurant),
+              click: (e) => handleMarkerClick(restaurant, e),
+              // Sur mobile, utiliser touchstart pour une meilleure réactivité
+              touchstart: (e) => {
+                if (isMobile) {
+                  e.originalEvent?.preventDefault?.();
+                  handleMarkerClick(restaurant, e as any);
+                }
+              },
               mouseover: (e) => {
-                const marker = e.target;
-                marker.setIcon(createCustomIcon(true));
+                if (!isMobile) {
+                  const marker = e.target;
+                  marker.setIcon(createCustomIcon(true));
+                }
               },
               mouseout: (e) => {
-                if (selectedRestaurant?.id !== restaurant.id) {
+                if (!isMobile && selectedRestaurant?.id !== restaurant.id) {
                   const marker = e.target;
                   marker.setIcon(createCustomIcon(false));
                 }
               },
             }}
           >
-            <Popup className="custom-popup">
-              <div className="text-center p-3">
-                <h3 className="font-bold text-base mb-1.5 text-gray-900">
-                  {restaurant.nom}
-                </h3>
-                <p className="text-sm text-gray-600 mb-1">{restaurant.adresse}</p>
-                <p className="text-xs text-gray-500">{restaurant.quartier}</p>
-              </div>
-            </Popup>
+            {/* Popup désactivé sur mobile, affiché sur desktop */}
+            {!isMobile && (
+              <Popup className="custom-popup" closeButton={true}>
+                <div className="text-center p-3">
+                  <h3 className="font-bold text-base mb-1.5 text-gray-900">
+                    {restaurant.nom}
+                  </h3>
+                  <p className="text-sm text-gray-600 mb-1">{restaurant.adresse}</p>
+                  <p className="text-xs text-gray-500">{restaurant.quartier}</p>
+                </div>
+              </Popup>
+            )}
           </Marker>
         ))}
         <MapUpdater selectedRestaurant={selectedRestaurant} />
