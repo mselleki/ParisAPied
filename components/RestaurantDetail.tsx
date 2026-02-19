@@ -68,9 +68,6 @@ export default function RestaurantDetail({
       setCurrentNote(currentNoteData?.note ?? null);
       setCurrentComment(currentNoteData?.comment ?? "");
       
-      // Réinitialiser showNotes quand on change de restaurant
-      setShowNotes(false);
-      
       return () => {
         document.body.style.position = "";
         document.body.style.top = "";
@@ -82,7 +79,7 @@ export default function RestaurantDetail({
       // Fermer le formulaire quand la modale se ferme
       setShowNotes(false);
     }
-  }, [restaurant, getNote, currentUser]);
+  }, [restaurant?.id, currentUser]); // Utiliser restaurant?.id au lieu de restaurant pour éviter les re-renders inutiles
 
   const handleSaveNote = () => {
     if (!restaurant) return;
@@ -281,7 +278,10 @@ export default function RestaurantDetail({
                     <h3 className="font-semibold text-gray-900">Vos notes</h3>
                     <button
                       type="button"
-                      onClick={() => setShowNotes(!showNotes)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowNotes(!showNotes);
+                      }}
                       className="text-sm text-emerald-600 hover:text-emerald-700 font-medium"
                     >
                       {showNotes ? "Masquer" : "Ajouter / Modifier"}
