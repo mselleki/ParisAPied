@@ -184,14 +184,46 @@ export default function MapComponent({
   if (doneIndices.length >= 2 && linePositions.length > 0) {
     const firstDoneIdx = doneIndices[0];
     const lastDoneIdx = doneIndices[doneIndices.length - 1];
+    const firstDoneResto = restaurants[firstDoneIdx];
+    const lastDoneResto = restaurants[lastDoneIdx];
     
-    // Si on a une route OSRM (beaucoup de points), on prend le segment entre les indices
+    // Si on a une route OSRM (beaucoup de points), trouver les points les plus proches
     if (routePositions && routePositions.length > restaurants.length) {
-      // Approximer : prendre une portion proportionnelle de la route
-      const totalPoints = routePositions.length;
-      const startPoint = Math.floor((firstDoneIdx / restaurants.length) * totalPoints);
-      const endPoint = Math.ceil(((lastDoneIdx + 1) / restaurants.length) * totalPoints);
-      greenSegment.push(...routePositions.slice(startPoint, endPoint + 1));
+      // Trouver l'index du point de route le plus proche du premier restaurant coché
+      let startPointIdx = 0;
+      let minDistStart = Infinity;
+      routePositions.forEach((point, idx) => {
+        const dist = Math.sqrt(
+          Math.pow(point[0] - firstDoneResto.lat, 2) +
+          Math.pow(point[1] - firstDoneResto.lon, 2)
+        );
+        if (dist < minDistStart) {
+          minDistStart = dist;
+          startPointIdx = idx;
+        }
+      });
+      
+      // Trouver l'index du point de route le plus proche du dernier restaurant coché
+      let endPointIdx = routePositions.length - 1;
+      let minDistEnd = Infinity;
+      routePositions.forEach((point, idx) => {
+        const dist = Math.sqrt(
+          Math.pow(point[0] - lastDoneResto.lat, 2) +
+          Math.pow(point[1] - lastDoneResto.lon, 2)
+        );
+        if (dist < minDistEnd) {
+          minDistEnd = dist;
+          endPointIdx = idx;
+        }
+      });
+      
+      // Extraire le segment entre ces deux points (dans le bon ordre)
+      if (startPointIdx <= endPointIdx) {
+        greenSegment.push(...routePositions.slice(startPointIdx, endPointIdx + 1));
+      } else {
+        // Si l'ordre est inversé, inverser le segment
+        greenSegment.push(...routePositions.slice(endPointIdx, startPointIdx + 1).reverse());
+      }
     } else {
       // Ligne droite : prendre les points entre les restaurants cochés
       greenSegment.push(...linePositions.slice(firstDoneIdx, lastDoneIdx + 1));

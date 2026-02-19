@@ -49,12 +49,26 @@ export default function Home() {
               Tour des petites adresses parisiennes
             </p>
           </div>
-          <Link
-            href="/classement"
-            className="flex-shrink-0 px-4 py-2 rounded-xl bg-white/20 hover:bg-white/30 text-white font-medium text-sm transition-colors"
-          >
-            🏆 Classement
-          </Link>
+          <div className="flex-shrink-0 flex gap-2">
+            <Link
+              href="/classement"
+              className="px-4 py-2 rounded-xl bg-white/20 hover:bg-white/30 text-white font-medium text-sm transition-colors"
+            >
+              🏆 Classement
+            </Link>
+            <Link
+              href="/souvenirs"
+              className="px-4 py-2 rounded-xl bg-white/20 hover:bg-white/30 text-white font-medium text-sm transition-colors"
+            >
+              📸 Souvenirs
+            </Link>
+            <Link
+              href="/stats"
+              className="px-4 py-2 rounded-xl bg-white/20 hover:bg-white/30 text-white font-medium text-sm transition-colors"
+            >
+              📊 Stats
+            </Link>
+          </div>
         </div>
       </motion.header>
 

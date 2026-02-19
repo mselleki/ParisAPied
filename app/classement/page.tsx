@@ -12,7 +12,7 @@ const VALIDATED_SUFFIX = "-validated";
 type UserKey = "moi" | "marianne";
 
 const userLabels: Record<UserKey, string> = {
-  moi: "Mon classement",
+  moi: "Classement d'Ilyass",
   marianne: "Classement de Marianne",
 };
 
@@ -59,6 +59,7 @@ export default function ClassementPage() {
   const [validatedMoi, setValidatedMoi] = useState(false);
   const [validatedMarianne, setValidatedMarianne] = useState(false);
   const [showRevelations, setShowRevelations] = useState(false);
+  const [revelationTab, setRevelationTab] = useState<"comparison" | "compromise">("comparison");
 
   const doneRestaurants = useMemo(
     () => allRestaurants.filter((r) => doneIds.includes(r.id)),
@@ -122,6 +123,80 @@ export default function ClassementPage() {
     return ids.map((id) => byId.get(id)).filter(Boolean) as Restaurant[];
   }, [allRestaurants, validatedMoi, validatedMarianne, showRevelations]);
 
+  // Comparaison des classements
+  const comparison = useMemo(() => {
+    if (moiOrder.length === 0 || marianneOrder.length === 0) {
+      return { agreements: 0, disagreements: [], compatibilityScore: 0 };
+    }
+
+    const moiRanks = new Map(moiOrder.map((r, i) => [r.id, i + 1]));
+    const marianneRanks = new Map(marianneOrder.map((r, i) => [r.id, i + 1]));
+
+    const agreements: { restaurant: Restaurant; rank: number }[] = [];
+    const disagreements: {
+      restaurant: Restaurant;
+      moiRank: number;
+      marianneRank: number;
+      diff: number;
+    }[] = [];
+
+    moiOrder.forEach((resto) => {
+      const moiRank = moiRanks.get(resto.id)!;
+      const marianneRank = marianneRanks.get(resto.id);
+      if (marianneRank) {
+        if (moiRank === marianneRank) {
+          agreements.push({ restaurant: resto, rank: moiRank });
+        } else {
+          disagreements.push({
+            restaurant: resto,
+            moiRank,
+            marianneRank,
+            diff: Math.abs(moiRank - marianneRank),
+          });
+        }
+      }
+    });
+
+    // Score de compatibilité : % d'accord + bonus si les différences sont petites
+    const total = agreements.length + disagreements.length;
+    const agreementPercent = total > 0 ? (agreements.length / total) * 100 : 0;
+    const avgDiff =
+      disagreements.length > 0
+        ? disagreements.reduce((sum, d) => sum + d.diff, 0) /
+          disagreements.length
+        : 0;
+    const diffBonus = Math.max(0, 20 - avgDiff * 5); // Bonus si différences < 4 rangs
+    const compatibilityScore = Math.min(100, agreementPercent + diffBonus);
+
+    return { agreements, disagreements, compatibilityScore: Math.round(compatibilityScore) };
+  }, [moiOrder, marianneOrder]);
+
+  // Classement de compromis (moyenne des rangs)
+  const compromiseOrder = useMemo(() => {
+    if (moiOrder.length === 0 || marianneOrder.length === 0) return [];
+
+    const moiRanks = new Map(moiOrder.map((r, i) => [r.id, i + 1]));
+    const marianneRanks = new Map(marianneOrder.map((r, i) => [r.id, i + 1]));
+    const byId = new Map(allRestaurants.map((r) => [r.id, r]));
+
+    const allIds = new Set([...moiOrder.map((r) => r.id), ...marianneOrder.map((r) => r.id)]);
+    const withAvgRank = Array.from(allIds)
+      .map((id) => {
+        const resto = byId.get(id);
+        if (!resto) return null;
+        const moiRank = moiRanks.get(id) ?? moiOrder.length + 1;
+        const marianneRank = marianneRanks.get(id) ?? marianneOrder.length + 1;
+        return {
+          restaurant: resto,
+          avgRank: (moiRank + marianneRank) / 2,
+        };
+      })
+      .filter((item): item is { restaurant: Restaurant; avgRank: number } => item !== null)
+      .sort((a, b) => a.avgRank - b.avgRank);
+
+    return withAvgRank.map((item) => item.restaurant);
+  }, [moiOrder, marianneOrder, allRestaurants]);
+
   return (
     <main className="min-h-screen bg-gray-50 flex flex-col">
       <header className="bg-gradient-to-r from-emerald-600 via-emerald-700 to-orange-600 text-white p-5 shadow-lg">
@@ -181,7 +256,7 @@ export default function ClassementPage() {
                     {u === "moi" ? "👤" : "🌸"}
                   </span>
                   <span className="font-bold text-lg text-gray-900">
-                    {u === "moi" ? "Moi" : "Marianne"}
+                    {u === "moi" ? "Ilyass" : "Marianne"}
                   </span>
                 </motion.button>
               ))}
@@ -327,44 +402,194 @@ export default function ClassementPage() {
                   ×
                 </button>
               </div>
-              <div className="grid grid-cols-2 gap-6">
-                <div>
-                  <h3 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                    👤 Moi
-                  </h3>
-                  <ol className="space-y-2">
-                    {moiOrder.map((r, i) => (
-                      <li
-                        key={r.id}
-                        className="flex items-center gap-2 text-sm text-gray-800"
-                      >
-                        <span className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 font-bold flex items-center justify-center text-xs">
-                          {i + 1}
-                        </span>
-                        {r.nom}
-                      </li>
-                    ))}
-                  </ol>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                    🌸 Marianne
-                  </h3>
-                  <ol className="space-y-2">
-                    {marianneOrder.map((r, i) => (
-                      <li
-                        key={r.id}
-                        className="flex items-center gap-2 text-sm text-gray-800"
-                      >
-                        <span className="w-6 h-6 rounded-full bg-orange-100 text-orange-700 font-bold flex items-center justify-center text-xs">
-                          {i + 1}
-                        </span>
-                        {r.nom}
-                      </li>
-                    ))}
-                  </ol>
+
+              {/* Score de compatibilité */}
+              <div className="mb-6 p-4 bg-gradient-to-r from-emerald-50 to-orange-50 rounded-xl border border-emerald-200">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-gray-900 mb-1">
+                    {comparison.compatibilityScore}%
+                  </div>
+                  <div className="text-sm text-gray-600">Score de compatibilité</div>
+                  <div className="text-xs text-gray-500 mt-2">
+                    {comparison.agreements.length} accord{comparison.agreements.length > 1 ? "s" : ""} •{" "}
+                    {comparison.disagreements.length} divergence{comparison.disagreements.length > 1 ? "s" : ""}
+                  </div>
                 </div>
               </div>
+
+              {/* Onglets */}
+              <div className="flex gap-2 mb-4 border-b border-gray-200">
+                <button
+                  type="button"
+                  onClick={() => setRevelationTab("comparison")}
+                  className={`px-4 py-2 font-medium text-sm transition-colors ${
+                    revelationTab === "comparison"
+                      ? "text-emerald-600 border-b-2 border-emerald-600"
+                      : "text-gray-500 hover:text-gray-700"
+                  }`}
+                >
+                  Comparaison
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRevelationTab("compromise")}
+                  className={`px-4 py-2 font-medium text-sm transition-colors ${
+                    revelationTab === "compromise"
+                      ? "text-emerald-600 border-b-2 border-emerald-600"
+                      : "text-gray-500 hover:text-gray-700"
+                  }`}
+                >
+                  Compromis
+                </button>
+              </div>
+
+              {revelationTab === "comparison" && (
+                <div className="space-y-6">
+                  {/* Classements côte à côte */}
+                  <div className="grid grid-cols-2 gap-6">
+                    <div>
+                      <h3 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                        👤 Ilyass
+                      </h3>
+                      <ol className="space-y-2">
+                        {moiOrder.map((r, i) => {
+                          const marianneRank = marianneOrder.findIndex((ro) => ro.id === r.id) + 1;
+                          const isAgreement = i + 1 === marianneRank;
+                          return (
+                            <li
+                              key={r.id}
+                              className="flex items-center gap-2 text-sm text-gray-800"
+                            >
+                              <span
+                                className={`w-6 h-6 rounded-full font-bold flex items-center justify-center text-xs ${
+                                  isAgreement
+                                    ? "bg-emerald-100 text-emerald-700"
+                                    : "bg-gray-100 text-gray-600"
+                                }`}
+                              >
+                                {i + 1}
+                              </span>
+                              <span className="flex-1">{r.nom}</span>
+                              {marianneRank > 0 && !isAgreement && (
+                                <span className="text-xs text-gray-500">
+                                  (M: {marianneRank})
+                                </span>
+                              )}
+                            </li>
+                          );
+                        })}
+                      </ol>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                        🌸 Marianne
+                      </h3>
+                      <ol className="space-y-2">
+                        {marianneOrder.map((r, i) => {
+                          const moiRank = moiOrder.findIndex((ro) => ro.id === r.id) + 1;
+                          const isAgreement = i + 1 === moiRank;
+                          return (
+                            <li
+                              key={r.id}
+                              className="flex items-center gap-2 text-sm text-gray-800"
+                            >
+                              <span
+                                className={`w-6 h-6 rounded-full font-bold flex items-center justify-center text-xs ${
+                                  isAgreement
+                                    ? "bg-orange-100 text-orange-700"
+                                    : "bg-gray-100 text-gray-600"
+                                }`}
+                              >
+                                {i + 1}
+                              </span>
+                              <span className="flex-1">{r.nom}</span>
+                              {moiRank > 0 && !isAgreement && (
+                                <span className="text-xs text-gray-500">
+                                  (I: {moiRank})
+                                </span>
+                              )}
+                            </li>
+                          );
+                        })}
+                      </ol>
+                    </div>
+                  </div>
+
+                  {/* Détails des accords et divergences */}
+                  {comparison.agreements.length > 0 && (
+                    <div>
+                      <h4 className="font-semibold text-emerald-700 mb-2 text-sm">
+                        ✓ Vous êtes d'accord sur :
+                      </h4>
+                      <div className="flex flex-wrap gap-2">
+                        {comparison.agreements.map((a) => (
+                          <span
+                            key={a.restaurant.id}
+                            className="px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-medium"
+                          >
+                            {a.restaurant.nom} (#{a.rank})
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {comparison.disagreements.length > 0 && (
+                    <div>
+                      <h4 className="font-semibold text-orange-700 mb-2 text-sm">
+                        ⚡ Vos plus grandes divergences :
+                      </h4>
+                      <div className="space-y-2">
+                        {comparison.disagreements
+                          .sort((a, b) => b.diff - a.diff)
+                          .slice(0, 5)
+                          .map((d) => (
+                            <div
+                              key={d.restaurant.id}
+                              className="flex items-center justify-between p-2 bg-gray-50 rounded-lg text-xs"
+                            >
+                              <span className="font-medium">{d.restaurant.nom}</span>
+                              <span className="text-gray-600">
+                                Ilyass: #{d.moiRank} • Marianne: #{d.marianneRank} (écart: {d.diff})
+                              </span>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {revelationTab === "compromise" && (
+                <div>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Classement basé sur la moyenne de vos rangs. Parfait pour trouver un équilibre
+                    ! 🎯
+                  </p>
+                  <ol className="space-y-2">
+                    {compromiseOrder.map((r, i) => {
+                      const moiRank = moiOrder.findIndex((ro) => ro.id === r.id) + 1;
+                      const marianneRank = marianneOrder.findIndex((ro) => ro.id === r.id) + 1;
+                      return (
+                        <li
+                          key={r.id}
+                          className="flex items-center gap-3 p-3 bg-gradient-to-r from-emerald-50 to-orange-50 rounded-lg border border-emerald-200"
+                        >
+                          <span className="w-8 h-8 rounded-full bg-emerald-600 text-white font-bold flex items-center justify-center text-sm flex-shrink-0">
+                            {i + 1}
+                          </span>
+                          <div className="flex-1 min-w-0">
+                            <div className="font-semibold text-gray-900">{r.nom}</div>
+                            <div className="text-xs text-gray-500 mt-1">
+                              Ilyass: #{moiRank || "?"} • Marianne: #{marianneRank || "?"}
+                            </div>
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ol>
+                </div>
+              )}
             </motion.div>
           </>
         )}
