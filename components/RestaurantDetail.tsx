@@ -178,12 +178,13 @@ export default function RestaurantDetail({
                       href={restaurant.site}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-1 px-5 py-3 bg-emerald-600 text-white rounded-lg active:bg-emerald-700 transition-colors font-medium shadow-lg text-center touch-manipulation"
+                      className="flex-1 px-5 py-3 bg-emerald-600 text-white rounded-lg active:bg-emerald-700 transition-colors font-medium shadow-lg touch-manipulation flex items-center justify-center gap-2"
                       style={{
                         WebkitTapHighlightColor: "transparent",
                       }}
                     >
-                      🌐 Site web
+                      <span className="text-lg leading-none">🌐</span>
+                      <span>Site web</span>
                     </a>
                   )}
                   {restaurant.instagram && (
@@ -191,12 +192,13 @@ export default function RestaurantDetail({
                       href={`https://instagram.com/${restaurant.instagram.replace("@", "")}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-1 px-5 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg active:from-orange-600 active:to-orange-700 transition-colors font-medium shadow-lg text-center touch-manipulation"
+                      className="flex-1 px-5 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg active:from-orange-600 active:to-orange-700 transition-colors font-medium shadow-lg touch-manipulation flex items-center justify-center gap-2"
                       style={{
                         WebkitTapHighlightColor: "transparent",
                       }}
                     >
-                      📸 Instagram
+                      <span className="text-lg leading-none">📸</span>
+                      <span>Instagram</span>
                     </a>
                   )}
                 </div>
