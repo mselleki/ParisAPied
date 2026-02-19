@@ -72,10 +72,9 @@ export default function RestaurantDetail({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: "100%" }}
             transition={{ type: "spring", damping: 30, stiffness: 300 }}
-            className="fixed bottom-0 left-0 right-0 md:bottom-auto md:left-1/2 md:right-auto md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 w-full md:w-auto md:max-w-2xl bg-white rounded-t-3xl md:rounded-2xl shadow-2xl overflow-y-auto border-t md:border border-gray-200"
+            className="fixed bottom-0 left-0 right-0 md:bottom-auto md:left-1/2 md:right-auto md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 w-full md:w-auto md:max-w-2xl md:max-h-[90vh] bg-white rounded-t-3xl md:rounded-2xl shadow-2xl overflow-y-auto border-t md:border border-gray-200 md:mx-4"
             style={{
               maxHeight: "calc(100dvh - env(safe-area-inset-bottom))",
-              paddingBottom: "env(safe-area-inset-bottom)",
               WebkitOverflowScrolling: "touch",
               zIndex: 99999,
               position: "fixed",
@@ -86,7 +85,7 @@ export default function RestaurantDetail({
               <div className="w-12 h-1.5 bg-gray-300 rounded-full" />
             </div>
 
-            <div className="p-6 md:p-8 pb-safe">
+            <div className="p-6 md:p-8 pb-safe md:pb-8">
               {/* Header */}
               <div className="flex items-start justify-between mb-6">
                 <div className="flex-1 min-w-0 pr-4">
@@ -158,9 +157,9 @@ export default function RestaurantDetail({
                 {restaurant.type && (
                   <div className="flex items-start gap-4">
                     <div className="text-2xl flex-shrink-0">🍽️</div>
-                    <div>
+                    <div className="min-w-0 flex-1">
                       <h3 className="font-semibold text-gray-900 mb-1">Type</h3>
-                      <p className="text-gray-600 capitalize">{restaurant.type}</p>
+                      <p className="text-gray-600 capitalize break-words">{restaurant.type}</p>
                     </div>
                   </div>
                 )}
