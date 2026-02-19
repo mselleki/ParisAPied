@@ -68,6 +68,9 @@ export default function RestaurantDetail({
       setCurrentNote(currentNoteData?.note ?? null);
       setCurrentComment(currentNoteData?.comment ?? "");
       
+      // Réinitialiser showNotes quand on change de restaurant
+      setShowNotes(false);
+      
       return () => {
         document.body.style.position = "";
         document.body.style.top = "";
@@ -75,6 +78,9 @@ export default function RestaurantDetail({
         document.body.style.overflow = "";
         window.scrollTo(0, scrollY);
       };
+    } else {
+      // Fermer le formulaire quand la modale se ferme
+      setShowNotes(false);
     }
   }, [restaurant, getNote, currentUser]);
 

@@ -49,24 +49,24 @@ export default function Home() {
               Tour des petites adresses parisiennes
             </p>
           </div>
-          <div className="flex-shrink-0 flex gap-2">
+          <div className="flex-shrink-0 flex flex-wrap gap-1.5 md:gap-2">
             <Link
               href="/classement"
-              className="px-4 py-2 rounded-xl bg-white/20 hover:bg-white/30 text-white font-medium text-sm transition-colors"
+              className="px-2 py-1.5 md:px-4 md:py-2 rounded-lg md:rounded-xl bg-white/20 hover:bg-white/30 text-white font-medium text-xs md:text-sm transition-colors"
             >
-              🏆 Classement
+              🏆 <span className="hidden sm:inline">Classement</span>
             </Link>
             <Link
               href="/souvenirs"
-              className="px-4 py-2 rounded-xl bg-white/20 hover:bg-white/30 text-white font-medium text-sm transition-colors"
+              className="px-2 py-1.5 md:px-4 md:py-2 rounded-lg md:rounded-xl bg-white/20 hover:bg-white/30 text-white font-medium text-xs md:text-sm transition-colors"
             >
-              📸 Souvenirs
+              📸 <span className="hidden sm:inline">Souvenirs</span>
             </Link>
             <Link
               href="/stats"
-              className="px-4 py-2 rounded-xl bg-white/20 hover:bg-white/30 text-white font-medium text-sm transition-colors"
+              className="px-2 py-1.5 md:px-4 md:py-2 rounded-lg md:rounded-xl bg-white/20 hover:bg-white/30 text-white font-medium text-xs md:text-sm transition-colors"
             >
-              📊 Stats
+              📊 <span className="hidden sm:inline">Stats</span>
             </Link>
           </div>
         </div>
