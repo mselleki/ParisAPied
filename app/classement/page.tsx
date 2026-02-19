@@ -519,7 +519,7 @@ export default function ClassementPage() {
                   {comparison.agreements.length > 0 && (
                     <div>
                       <h4 className="font-semibold text-emerald-700 mb-2 text-sm">
-                        ✓ Vous êtes d'accord sur :
+                        ✓ Vous êtes d&apos;accord sur :
                       </h4>
                       <div className="flex flex-wrap gap-2">
                         {comparison.agreements.map((a) => (
