@@ -31,6 +31,7 @@ export default function RestaurantDetail({
   const [photoInput, setPhotoInput] = useState<HTMLInputElement | null>(null);
   const [currentNote, setCurrentNote] = useState<number | null>(null);
   const [currentComment, setCurrentComment] = useState("");
+  const [noteAuthor, setNoteAuthor] = useState<"moi" | "marianne">("moi"); // Qui ajoute la note (choix dans le formulaire)
   const [moiNote, setMoiNote] = useState<number | null>(null);
   const [moiComment, setMoiComment] = useState("");
   const [marianneNote, setMarianneNote] = useState<number | null>(null);
@@ -63,7 +64,8 @@ export default function RestaurantDetail({
       setMarianneNote(marianneNoteData?.note ?? null);
       setMarianneComment(marianneNoteData?.comment ?? "");
       
-      // Charger la note de l'utilisateur actuel
+      // Charger la note de l'auteur par défaut (currentUser)
+      setNoteAuthor(currentUser);
       const currentNoteData = getNote(restaurant.id, currentUser);
       setCurrentNote(currentNoteData?.note ?? null);
       setCurrentComment(currentNoteData?.comment ?? "");
@@ -83,7 +85,7 @@ export default function RestaurantDetail({
 
   const handleSaveNote = () => {
     if (!restaurant) return;
-    setNote(restaurant.id, currentUser, currentNote, currentComment || null);
+    setNote(restaurant.id, noteAuthor, currentNote, currentComment || null);
     // Recharger les notes après sauvegarde
     const moiNoteData = getNote(restaurant.id, "moi");
     const marianneNoteData = getNote(restaurant.id, "marianne");
@@ -324,20 +326,60 @@ export default function RestaurantDetail({
                   {/* Formulaire pour ajouter/modifier */}
                   {showNotes && (
                     <div className="p-4 bg-gray-50 rounded-lg space-y-4">
+                      {/* Choix : qui ajoute la note ? */}
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          {currentUser === "moi" ? "👤 Ilyass" : "🌸 Marianne"} - Note (1-5)
+                        <label className="block text-sm font-medium text-gray-900 mb-2">
+                          Qui ajoute la note ?
                         </label>
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 flex-wrap">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setNoteAuthor("moi");
+                              const data = getNote(restaurant!.id, "moi");
+                              setCurrentNote(data?.note ?? null);
+                              setCurrentComment(data?.comment ?? "");
+                            }}
+                            className={`flex-1 min-w-[100px] py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
+                              noteAuthor === "moi"
+                                ? "bg-emerald-600 text-white"
+                                : "bg-white border-2 border-gray-300 text-gray-800 hover:border-emerald-400"
+                            }`}
+                          >
+                            👤 Ilyass
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setNoteAuthor("marianne");
+                              const data = getNote(restaurant!.id, "marianne");
+                              setCurrentNote(data?.note ?? null);
+                              setCurrentComment(data?.comment ?? "");
+                            }}
+                            className={`flex-1 min-w-[100px] py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
+                              noteAuthor === "marianne"
+                                ? "bg-orange-500 text-white"
+                                : "bg-white border-2 border-gray-300 text-gray-800 hover:border-orange-400"
+                            }`}
+                          >
+                            🌸 Marianne
+                          </button>
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-900 mb-2">
+                          {noteAuthor === "moi" ? "👤 Ilyass" : "🌸 Marianne"} - Note (1-5)
+                        </label>
+                        <div className="flex flex-wrap gap-2">
                           {[1, 2, 3, 4, 5].map((n) => (
                             <button
                               key={n}
                               type="button"
                               onClick={() => setCurrentNote(n)}
-                              className={`w-10 h-10 rounded-lg font-semibold transition-colors ${
+                              className={`w-9 h-9 sm:w-10 sm:h-10 rounded-lg font-semibold transition-colors text-sm ${
                                 currentNote === n
                                   ? "bg-emerald-600 text-white"
-                                  : "bg-white border-2 border-gray-300 text-gray-700 hover:border-emerald-400"
+                                  : "bg-white border-2 border-gray-300 text-gray-800 hover:border-emerald-400"
                               }`}
                             >
                               {n}
@@ -346,28 +388,28 @@ export default function RestaurantDetail({
                           <button
                             type="button"
                             onClick={() => setCurrentNote(null)}
-                            className="px-3 h-10 rounded-lg bg-white border-2 border-gray-300 text-gray-700 hover:border-gray-400 text-sm"
+                            className="px-2 sm:px-3 h-9 sm:h-10 rounded-lg bg-white border-2 border-gray-300 text-gray-800 hover:border-gray-400 text-sm"
                           >
                             Effacer
                           </button>
                         </div>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-gray-900 mb-2">
                           Commentaire
                         </label>
                         <textarea
                           value={currentComment}
                           onChange={(e) => setCurrentComment(e.target.value)}
                           placeholder="Ton avis sur ce resto..."
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm resize-none"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm resize-none text-gray-900 placeholder:text-gray-600 bg-white"
                           rows={2}
                         />
                       </div>
                       <button
                         type="button"
                         onClick={handleSaveNote}
-                        className="w-full px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium text-sm"
+                        className="w-full px-4 py-2.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium text-sm"
                       >
                         Enregistrer
                       </button>
