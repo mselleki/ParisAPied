@@ -19,9 +19,16 @@ export default function RestaurantDetail({
   onToggleDone,
 }: RestaurantDetailProps) {
   const [mounted, setMounted] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+    const checkDesktop = () => {
+      setIsDesktop(window.innerWidth >= 768);
+    };
+    checkDesktop();
+    window.addEventListener("resize", checkDesktop);
+    return () => window.removeEventListener("resize", checkDesktop);
   }, []);
 
   useEffect(() => {
@@ -68,13 +75,13 @@ export default function RestaurantDetail({
 
           {/* Modal - Bottom sheet sur mobile, centrée sur desktop */}
           <motion.div
-            initial={{ opacity: 0, y: "100%" }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: "100%" }}
+            initial={isDesktop ? { opacity: 0, scale: 0.95, x: "-50%", y: "-50%" } : { opacity: 0, y: "100%" }}
+            animate={isDesktop ? { opacity: 1, scale: 1, x: "-50%", y: "-50%" } : { opacity: 1, y: 0 }}
+            exit={isDesktop ? { opacity: 0, scale: 0.95, x: "-50%", y: "-50%" } : { opacity: 0, y: "100%" }}
             transition={{ type: "spring", damping: 30, stiffness: 300 }}
-            className="fixed bottom-0 left-0 right-0 md:bottom-auto md:left-1/2 md:right-auto md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 w-full md:w-auto md:max-w-2xl md:max-h-[90vh] bg-white rounded-t-3xl md:rounded-2xl shadow-2xl overflow-y-auto border-t md:border border-gray-200 md:mx-4"
+            className="fixed bottom-0 left-0 right-0 md:bottom-auto md:left-1/2 md:right-auto md:top-1/2 w-full md:w-auto md:max-w-2xl md:max-h-[85vh] bg-white rounded-t-3xl md:rounded-2xl shadow-2xl overflow-y-auto border-t md:border border-gray-200 md:mx-4"
             style={{
-              maxHeight: "calc(100dvh - env(safe-area-inset-bottom))",
+              maxHeight: isDesktop ? "85vh" : "calc(100dvh - env(safe-area-inset-bottom))",
               WebkitOverflowScrolling: "touch",
               zIndex: 99999,
               position: "fixed",
