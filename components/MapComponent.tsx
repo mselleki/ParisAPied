@@ -161,7 +161,8 @@ export default function MapComponent({
     return () => {
       cancelled = true;
     };
-  }, [waypointsKey, restaurants.length]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [waypointsKey]);
 
   // Fallback ligne droite si pas encore de route ou 1 seul point
   const linePositions: L.LatLngTuple[] =

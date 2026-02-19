@@ -76,7 +76,7 @@ export default function RestaurantDetail({
         window.scrollTo(0, scrollY);
       };
     }
-  }, [restaurant, getNote]);
+  }, [restaurant, getNote, currentUser]);
 
   const handleSaveNote = () => {
     if (!restaurant) return;
@@ -262,7 +262,7 @@ export default function RestaurantDetail({
                         ))}
                       {restaurant && getPhotos(restaurant.id).length === 0 && (
                         <p className="text-xs text-gray-500 col-span-3">
-                          Aucune photo pour l'instant
+                          Aucune photo pour l&apos;instant
                         </p>
                       )}
                     </div>
@@ -292,7 +292,7 @@ export default function RestaurantDetail({
                             <span className="text-emerald-600 font-semibold">{moiNote}/5</span>
                           )}
                           {moiComment && (
-                            <span className="text-gray-600 italic">"{moiComment}"</span>
+                            <span className="text-gray-600 italic">&quot;{moiComment}&quot;</span>
                           )}
                         </div>
                       </div>
@@ -305,13 +305,13 @@ export default function RestaurantDetail({
                             <span className="text-orange-600 font-semibold">{marianneNote}/5</span>
                           )}
                           {marianneComment && (
-                            <span className="text-gray-600 italic">"{marianneComment}"</span>
+                            <span className="text-gray-600 italic">&quot;{marianneComment}&quot;</span>
                           )}
                         </div>
                       </div>
                     )}
                     {moiNote === null && !moiComment && marianneNote === null && !marianneComment && (
-                      <p className="text-sm text-gray-500 italic">Aucune note pour l'instant</p>
+                      <p className="text-sm text-gray-500 italic">Aucune note pour l&apos;instant</p>
                     )}
                   </div>
 

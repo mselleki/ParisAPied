@@ -114,14 +114,14 @@ export default function ClassementPage() {
     if (!ids) return [];
     const byId = new Map(allRestaurants.map((r) => [r.id, r]));
     return ids.map((id) => byId.get(id)).filter(Boolean) as Restaurant[];
-  }, [allRestaurants, validatedMoi, validatedMarianne, showRevelations]);
+  }, [allRestaurants]);
 
   const marianneOrder = useMemo(() => {
     const ids = loadOrder("marianne");
     if (!ids) return [];
     const byId = new Map(allRestaurants.map((r) => [r.id, r]));
     return ids.map((id) => byId.get(id)).filter(Boolean) as Restaurant[];
-  }, [allRestaurants, validatedMoi, validatedMarianne, showRevelations]);
+  }, [allRestaurants]);
 
   // Comparaison des classements
   const comparison = useMemo(() => {
