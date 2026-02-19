@@ -170,9 +170,35 @@ export default function MapComponent({
       : restaurants.length >= 2
         ? restaurants.map((r) => [r.lat, r.lon] as L.LatLngTuple)
         : [];
-  const routeComplete = doneIds.length >= 2;
-  const routeColor = routeComplete ? "#059669" : "#f97316";
-  const polylineKey = linePositions.map((p) => p.join(",")).join("|") + routeColor;
+
+  // Trouver les indices des restaurants cochés dans l'ordre de la liste
+  const doneIndices: number[] = [];
+  restaurants.forEach((r, idx) => {
+    if (doneIds.includes(r.id)) {
+      doneIndices.push(idx);
+    }
+  });
+
+  // Extraire le segment vert entre les restaurants cochés
+  const greenSegment: L.LatLngTuple[] = [];
+  if (doneIndices.length >= 2 && linePositions.length > 0) {
+    const firstDoneIdx = doneIndices[0];
+    const lastDoneIdx = doneIndices[doneIndices.length - 1];
+    
+    // Si on a une route OSRM (beaucoup de points), on prend le segment entre les indices
+    if (routePositions && routePositions.length > restaurants.length) {
+      // Approximer : prendre une portion proportionnelle de la route
+      const totalPoints = routePositions.length;
+      const startPoint = Math.floor((firstDoneIdx / restaurants.length) * totalPoints);
+      const endPoint = Math.ceil(((lastDoneIdx + 1) / restaurants.length) * totalPoints);
+      greenSegment.push(...routePositions.slice(startPoint, endPoint + 1));
+    } else {
+      // Ligne droite : prendre les points entre les restaurants cochés
+      greenSegment.push(...linePositions.slice(firstDoneIdx, lastDoneIdx + 1));
+    }
+  }
+
+  const polylineKey = linePositions.map((p) => p.join(",")).join("|");
 
   return (
     <div className="w-full h-full relative bg-gray-50">
@@ -223,6 +249,7 @@ export default function MapComponent({
         />
         {linePositions.length >= 2 && (
           <>
+            {/* Contour blanc pour tout le tracé */}
             <Polyline
               key={`${polylineKey}-stroke`}
               positions={linePositions}
@@ -234,17 +261,45 @@ export default function MapComponent({
                 lineJoin: "round",
               }}
             />
+            {/* Tracé orange pour tout le chemin */}
             <Polyline
-              key={polylineKey}
+              key={`${polylineKey}-orange`}
               positions={linePositions}
               pathOptions={{
-                color: routeColor,
+                color: "#f97316",
                 weight: 6,
                 opacity: 1,
                 lineCap: "round",
                 lineJoin: "round",
               }}
             />
+            {/* Segment vert uniquement entre les restaurants cochés */}
+            {greenSegment.length >= 2 && (
+              <>
+                <Polyline
+                  key={`${polylineKey}-green-stroke`}
+                  positions={greenSegment}
+                  pathOptions={{
+                    color: "white",
+                    weight: 10,
+                    opacity: 0.9,
+                    lineCap: "round",
+                    lineJoin: "round",
+                  }}
+                />
+                <Polyline
+                  key={`${polylineKey}-green`}
+                  positions={greenSegment}
+                  pathOptions={{
+                    color: "#059669",
+                    weight: 6,
+                    opacity: 1,
+                    lineCap: "round",
+                    lineJoin: "round",
+                  }}
+                />
+              </>
+            )}
           </>
         )}
         {restaurants.map((restaurant) => {
