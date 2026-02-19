@@ -86,13 +86,14 @@ export default function RestaurantDetail({
   const handleSaveNote = () => {
     if (!restaurant) return;
     setNote(restaurant.id, noteAuthor, currentNote, currentComment || null);
-    // Recharger les notes après sauvegarde
-    const moiNoteData = getNote(restaurant.id, "moi");
-    const marianneNoteData = getNote(restaurant.id, "marianne");
-    setMoiNote(moiNoteData?.note ?? null);
-    setMoiComment(moiNoteData?.comment ?? "");
-    setMarianneNote(marianneNoteData?.note ?? null);
-    setMarianneComment(marianneNoteData?.comment ?? "");
+    // Mise à jour immédiate de l'affichage (évite double clic : getNote lit le state du hook pas encore mis à jour)
+    if (noteAuthor === "moi") {
+      setMoiNote(currentNote);
+      setMoiComment(currentComment);
+    } else {
+      setMarianneNote(currentNote);
+      setMarianneComment(currentComment);
+    }
     setShowNotes(false);
   };
 
