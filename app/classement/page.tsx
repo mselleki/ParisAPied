@@ -126,7 +126,7 @@ export default function ClassementPage() {
   // Comparaison des classements
   const comparison = useMemo(() => {
     if (moiOrder.length === 0 || marianneOrder.length === 0) {
-      return { agreements: 0, disagreements: [], compatibilityScore: 0 };
+      return { agreements: [], disagreements: [], compatibilityScore: 0 };
     }
 
     const moiRanks = new Map(moiOrder.map((r, i) => [r.id, i + 1]));
