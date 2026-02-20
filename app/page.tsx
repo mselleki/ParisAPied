@@ -1,14 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Restaurant } from "@/types/restaurant";
 import RestaurantList from "@/components/RestaurantList";
 import MapView from "@/components/MapView";
 import RestaurantDetail from "@/components/RestaurantDetail";
+import SyncBanner from "@/components/SyncBanner";
 import restaurantsData from "@/data/restaurants.json";
 import { motion, AnimatePresence } from "framer-motion";
 import { useDoneRestaurants } from "@/hooks/useDoneRestaurants";
+import { getRoomId, pullSync, buildPayload } from "@/lib/sync";
 
 export default function Home() {
   const [viewMode, setViewMode] = useState<"list" | "map" | "split">("split");
@@ -16,6 +18,36 @@ export default function Home() {
     useState<Restaurant | null>(null);
   const [showDetail, setShowDetail] = useState(false);
   const { doneIds, toggleDone, isDone } = useDoneRestaurants();
+
+  // Si code sync : au chargement, pull puis recharger seulement si les données ont changé
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const roomId = getRoomId();
+    if (!roomId) return;
+    const before = JSON.stringify(buildPayload());
+    pullSync().then((ok) => {
+      if (!ok) return;
+      const after = JSON.stringify(buildPayload());
+      if (before !== after) window.location.reload();
+    });
+  }, []);
+
+  // Polling : pull toutes les 30s quand l’onglet est visible pour mettre à jour sans refresh
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const roomId = getRoomId();
+    if (!roomId) return;
+    const interval = setInterval(() => {
+      if (document.visibilityState !== "visible") return;
+      const before = JSON.stringify(buildPayload());
+      pullSync().then((ok) => {
+        if (!ok) return;
+        const after = JSON.stringify(buildPayload());
+        if (before !== after) window.location.reload();
+      });
+    }, 30_000);
+    return () => clearInterval(interval);
+  }, []);
 
   const restaurants = restaurantsData.restaurants as Restaurant[];
 
@@ -68,6 +100,7 @@ export default function Home() {
             >
               📊 <span className="hidden sm:inline">Stats</span>
             </Link>
+            <SyncBanner />
           </div>
         </div>
       </motion.header>

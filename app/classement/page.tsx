@@ -6,6 +6,7 @@ import { motion, Reorder, AnimatePresence } from "framer-motion";
 import { Restaurant } from "@/types/restaurant";
 import restaurantsData from "@/data/restaurants.json";
 import { useDoneRestaurants } from "@/hooks/useDoneRestaurants";
+import { pushSync } from "@/lib/sync";
 
 const STORAGE_PREFIX = "paris-a-pied-classement-";
 const VALIDATED_SUFFIX = "-validated";
@@ -93,6 +94,7 @@ export default function ClassementPage() {
   useEffect(() => {
     if (!user || orderedRestaurants.length === 0) return;
     saveOrder(user, orderedRestaurants.map((r) => r.id));
+    pushSync();
   }, [user, orderedRestaurants]);
 
   const handleReorder = (newOrder: Restaurant[]) => {
@@ -104,6 +106,7 @@ export default function ClassementPage() {
       setValidated(user, true);
       if (user === "moi") setValidatedMoi(true);
       else setValidatedMarianne(true);
+      pushSync();
     }
   };
 

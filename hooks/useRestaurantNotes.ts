@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { pushSync } from "@/lib/sync";
 
 const STORAGE_PREFIX = "paris-a-pied-notes-";
 
@@ -53,6 +54,7 @@ export function useRestaurantNotes() {
       }
       next[restaurantId][userId] = { note, comment };
       saveNotes(next);
+      pushSync();
       return next;
     });
   };

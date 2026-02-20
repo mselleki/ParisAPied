@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { pushSync } from "@/lib/sync";
 
 const STORAGE_KEY = "paris-a-pied-done";
 
@@ -38,6 +39,7 @@ export function useDoneRestaurants() {
         ? prev.filter((id) => id !== restaurantId)
         : [...prev, restaurantId];
       saveDoneIds(next);
+      pushSync();
       return next;
     });
   };
