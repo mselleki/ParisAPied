@@ -1,5 +1,8 @@
 /**
- * Sync state to/from backend. Payload = all localStorage data we care about.
+ * Sync: Redis (or KV) is the source of truth, like a Postgres DB.
+ * - On load: we pull from API and apply to localStorage (local cache).
+ * - On change: we push to API; polling on other devices pulls and refreshes.
+ * No "sync button" needed after initial setup (create or join room).
  * Photos are not synced (too heavy).
  */
 const ROOM_KEY = "paris-a-pied-room";
