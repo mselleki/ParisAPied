@@ -92,9 +92,6 @@ export default function SyncBanner() {
   return (
     <div className="relative">
       <div className="flex items-center gap-1.5">
-        <span className="hidden sm:inline font-mono text-xs text-white/90 truncate max-w-[8rem] md:max-w-[10rem]" title={roomId}>
-          {roomId}
-        </span>
         <button
           ref={buttonRef}
           type="button"
