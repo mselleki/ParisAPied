@@ -9,6 +9,7 @@ const ROOM_KEY = "paris-a-pied-room";
 const DONE_KEY = "paris-a-pied-done";
 const CLASSEMENT_PREFIX = "paris-a-pied-classement-";
 const NOTES_KEY = "paris-a-pied-notes-all";
+const TRAJET_KEY = "paris-a-pied-trajet-order";
 
 export type SyncPayload = {
   doneIds: number[];
@@ -17,6 +18,7 @@ export type SyncPayload = {
   validatedMoi: boolean;
   validatedMarianne: boolean;
   notes: Record<string, { moi?: { note: number | null; comment: string | null }; marianne?: { note: number | null; comment: string | null } }>;
+  trajetOrder?: number[];
 };
 
 export function getRoomId(): string | null {
@@ -52,6 +54,7 @@ export function buildPayload(): SyncPayload {
     validatedMoi: localStorage.getItem(CLASSEMENT_PREFIX + "moi" + "-validated") === "1",
     validatedMarianne: localStorage.getItem(CLASSEMENT_PREFIX + "marianne" + "-validated") === "1",
     notes: getJson(NOTES_KEY, {}),
+    trajetOrder: getJson(TRAJET_KEY, []),
   };
 }
 
@@ -63,6 +66,9 @@ export function applyPayload(payload: SyncPayload) {
   localStorage.setItem(CLASSEMENT_PREFIX + "moi-validated", (payload.validatedMoi ? "1" : "0"));
   localStorage.setItem(CLASSEMENT_PREFIX + "marianne-validated", (payload.validatedMarianne ? "1" : "0"));
   localStorage.setItem(NOTES_KEY, JSON.stringify(payload.notes ?? {}));
+  if (payload.trajetOrder && Array.isArray(payload.trajetOrder)) {
+    localStorage.setItem(TRAJET_KEY, JSON.stringify(payload.trajetOrder));
+  }
 }
 
 let pushTimeout: ReturnType<typeof setTimeout> | null = null;

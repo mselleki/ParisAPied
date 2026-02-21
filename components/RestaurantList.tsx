@@ -3,7 +3,7 @@
 import { Restaurant } from "@/types/restaurant";
 import { useState, useMemo } from "react";
 import RestaurantCard from "./RestaurantCard";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, Reorder } from "framer-motion";
 
 interface RestaurantListProps {
   restaurants: Restaurant[];
@@ -12,6 +12,7 @@ interface RestaurantListProps {
   doneIds: number[];
   onToggleDone: (restaurantId: number) => void;
   isDone: (restaurantId: number) => boolean;
+  onTrajetReorder?: (newOrder: Restaurant[]) => void;
 }
 
 export default function RestaurantList({
@@ -21,6 +22,7 @@ export default function RestaurantList({
   doneIds,
   onToggleDone,
   isDone,
+  onTrajetReorder,
 }: RestaurantListProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState<string>("all");
@@ -50,6 +52,32 @@ export default function RestaurantList({
       return matchesSearch && matchesType && matchesQuartier;
     });
   }, [restaurants, searchTerm, filterType, filterQuartier]);
+
+  const hasFilter = searchTerm !== "" || filterType !== "all" || filterQuartier !== "all";
+  const filteredSet = useMemo(
+    () => new Set(filteredRestaurants.map((r) => r.id)),
+    [filteredRestaurants]
+  );
+  const filteredIndices = useMemo(
+    () =>
+      restaurants
+        .map((r, i) => (filteredSet.has(r.id) ? i : -1))
+        .filter((i) => i >= 0),
+    [restaurants, filteredSet]
+  );
+
+  const handleReorder = (newFilteredOrder: Restaurant[]) => {
+    if (!onTrajetReorder) return;
+    if (!hasFilter) {
+      onTrajetReorder(newFilteredOrder);
+      return;
+    }
+    const newFull = [...restaurants];
+    newFilteredOrder.forEach((r, j) => {
+      newFull[filteredIndices[j]] = r;
+    });
+    onTrajetReorder(newFull);
+  };
 
   return (
     <div className="flex flex-col h-full bg-gray-50">
@@ -100,16 +128,21 @@ export default function RestaurantList({
           key={filteredRestaurants.length}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="text-sm text-gray-600 font-medium"
+          className="text-sm text-gray-600 font-medium flex items-center gap-2 flex-wrap"
         >
           {filteredRestaurants.length} restaurant
           {filteredRestaurants.length > 1 ? "s" : ""} trouvé
           {filteredRestaurants.length > 1 ? "s" : ""}
+          {onTrajetReorder && (
+            <span className="text-gray-400 font-normal">
+              — Glisse pour modifier l’ordre du trajet
+            </span>
+          )}
         </motion.div>
       </div>
 
-      {/* Liste */}
-      <div className="flex-1 overflow-y-auto p-5 space-y-4 bg-gray-50">
+      {/* Liste (réordonnable par drag pour mettre à jour le trajet sur la carte) */}
+      <div className="flex-1 overflow-y-auto p-5 bg-gray-50">
         <AnimatePresence mode="wait">
           {filteredRestaurants.length === 0 ? (
             <motion.div
@@ -126,21 +159,46 @@ export default function RestaurantList({
                 Essayez de modifier vos filtres
               </p>
             </motion.div>
+          ) : onTrajetReorder ? (
+            <Reorder.Group
+              axis="y"
+              values={filteredRestaurants}
+              onReorder={handleReorder}
+              className="space-y-4"
+            >
+              {filteredRestaurants.map((restaurant, index) => (
+                <Reorder.Item key={restaurant.id} value={restaurant}>
+                  <RestaurantCard
+                    restaurant={restaurant}
+                    isSelected={selectedRestaurant?.id === restaurant.id}
+                    onClick={() => onSelectRestaurant(restaurant)}
+                    index={index}
+                    isDone={isDone(restaurant.id)}
+                    onToggleDone={(e) => {
+                      e.stopPropagation();
+                      onToggleDone(restaurant.id);
+                    }}
+                  />
+                </Reorder.Item>
+              ))}
+            </Reorder.Group>
           ) : (
-            filteredRestaurants.map((restaurant, index) => (
-              <RestaurantCard
-                key={restaurant.id}
-                restaurant={restaurant}
-                isSelected={selectedRestaurant?.id === restaurant.id}
-                onClick={() => onSelectRestaurant(restaurant)}
-                index={index}
-                isDone={isDone(restaurant.id)}
-                onToggleDone={(e) => {
-                  e.stopPropagation();
-                  onToggleDone(restaurant.id);
-                }}
-              />
-            ))
+            <div className="space-y-4">
+              {filteredRestaurants.map((restaurant, index) => (
+                <RestaurantCard
+                  key={restaurant.id}
+                  restaurant={restaurant}
+                  isSelected={selectedRestaurant?.id === restaurant.id}
+                  onClick={() => onSelectRestaurant(restaurant)}
+                  index={index}
+                  isDone={isDone(restaurant.id)}
+                  onToggleDone={(e) => {
+                    e.stopPropagation();
+                    onToggleDone(restaurant.id);
+                  }}
+                />
+              ))}
+            </div>
           )}
         </AnimatePresence>
       </div>
