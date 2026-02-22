@@ -10,6 +10,7 @@ const DONE_KEY = "paris-a-pied-done";
 const CLASSEMENT_PREFIX = "paris-a-pied-classement-";
 const NOTES_KEY = "paris-a-pied-notes-all";
 const TRAJET_KEY = "paris-a-pied-trajet-order";
+const SSP_KEY = "paris-a-pied-ssp-ids";
 
 export type SyncPayload = {
   doneIds: number[];
@@ -19,6 +20,7 @@ export type SyncPayload = {
   validatedMarianne: boolean;
   notes: Record<string, { moi?: { note: number | null; comment: string | null }; marianne?: { note: number | null; comment: string | null } }>;
   trajetOrder?: number[];
+  sspIds?: number[];
 };
 
 export function getRoomId(): string | null {
@@ -55,6 +57,7 @@ export function buildPayload(): SyncPayload {
     validatedMarianne: localStorage.getItem(CLASSEMENT_PREFIX + "marianne" + "-validated") === "1",
     notes: getJson(NOTES_KEY, {}),
     trajetOrder: getJson(TRAJET_KEY, []),
+    sspIds: getJson(SSP_KEY, []),
   };
 }
 
@@ -68,6 +71,9 @@ export function applyPayload(payload: SyncPayload) {
   localStorage.setItem(NOTES_KEY, JSON.stringify(payload.notes ?? {}));
   if (payload.trajetOrder && Array.isArray(payload.trajetOrder)) {
     localStorage.setItem(TRAJET_KEY, JSON.stringify(payload.trajetOrder));
+  }
+  if (payload.sspIds && Array.isArray(payload.sspIds)) {
+    localStorage.setItem(SSP_KEY, JSON.stringify(payload.sspIds));
   }
 }
 

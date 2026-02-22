@@ -13,6 +13,8 @@ interface RestaurantListProps {
   onToggleDone: (restaurantId: number) => void;
   isDone: (restaurantId: number) => boolean;
   onTrajetReorder?: (newOrder: Restaurant[]) => void;
+  isInSsp?: (restaurantId: number) => boolean;
+  onToggleSsp?: (restaurantId: number) => void;
 }
 
 export default function RestaurantList({
@@ -23,6 +25,8 @@ export default function RestaurantList({
   onToggleDone,
   isDone,
   onTrajetReorder,
+  isInSsp,
+  onToggleSsp,
 }: RestaurantListProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState<string>("all");
@@ -178,6 +182,8 @@ export default function RestaurantList({
                       e.stopPropagation();
                       onToggleDone(restaurant.id);
                     }}
+                    isInSsp={isInSsp?.(restaurant.id)}
+                    onToggleSsp={onToggleSsp ? (e) => { e.stopPropagation(); onToggleSsp(restaurant.id); } : undefined}
                   />
                 </Reorder.Item>
               ))}
@@ -196,6 +202,8 @@ export default function RestaurantList({
                     e.stopPropagation();
                     onToggleDone(restaurant.id);
                   }}
+                  isInSsp={isInSsp?.(restaurant.id)}
+                  onToggleSsp={onToggleSsp ? (e) => { e.stopPropagation(); onToggleSsp(restaurant.id); } : undefined}
                 />
               ))}
             </div>

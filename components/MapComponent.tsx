@@ -164,13 +164,9 @@ export default function MapComponent({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [waypointsKey]);
 
-  // Fallback ligne droite si pas encore de route ou 1 seul point
+  // N'afficher le tracé qu'une fois la route piétonne chargée (pas de flash "vol d'oiseau")
   const linePositions: L.LatLngTuple[] =
-    routePositions && routePositions.length >= 2
-      ? routePositions
-      : restaurants.length >= 2
-        ? restaurants.map((r) => [r.lat, r.lon] as L.LatLngTuple)
-        : [];
+    routePositions && routePositions.length >= 2 ? routePositions : [];
 
   // Trouver les indices des restaurants cochés dans l'ordre de la liste
   const doneIndices: number[] = [];

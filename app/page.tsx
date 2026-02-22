@@ -11,6 +11,7 @@ import restaurantsData from "@/data/restaurants.json";
 import { motion, AnimatePresence } from "framer-motion";
 import { useDoneRestaurants } from "@/hooks/useDoneRestaurants";
 import { useTrajetOrder } from "@/hooks/useTrajetOrder";
+import { useSsp } from "@/hooks/useSsp";
 import { getRoomId, pullSync, buildPayload } from "@/lib/sync";
 
 export default function Home() {
@@ -21,6 +22,9 @@ export default function Home() {
   const { doneIds, toggleDone, isDone } = useDoneRestaurants();
   const restaurantsFromData = restaurantsData.restaurants as Restaurant[];
   const [orderedRestaurants, setTrajetOrder] = useTrajetOrder(restaurantsFromData);
+  const { isInSsp, toggleSsp } = useSsp(restaurantsFromData.map((r) => r.id));
+
+  const sspRestaurantsForMap = orderedRestaurants.filter((r) => isInSsp(r.id));
 
   // Si code sync : au chargement, pull puis recharger seulement si les données ont changé
   useEffect(() => {
@@ -163,6 +167,8 @@ export default function Home() {
                 onToggleDone={toggleDone}
                 isDone={isDone}
                 onTrajetReorder={setTrajetOrder}
+                isInSsp={isInSsp}
+                onToggleSsp={toggleSsp}
               />
             </motion.div>
           )}
@@ -177,7 +183,7 @@ export default function Home() {
               className="h-full"
             >
               <MapView
-                restaurants={orderedRestaurants}
+                restaurants={sspRestaurantsForMap}
                 selectedRestaurant={selectedRestaurant}
                 onSelectRestaurant={handleSelectRestaurant}
                 doneIds={doneIds}
@@ -203,11 +209,13 @@ export default function Home() {
                   onToggleDone={toggleDone}
                   isDone={isDone}
                   onTrajetReorder={setTrajetOrder}
+                  isInSsp={isInSsp}
+                  onToggleSsp={toggleSsp}
                 />
               </div>
               <div className="w-full md:w-1/2 overflow-hidden">
                 <MapView
-                  restaurants={orderedRestaurants}
+                  restaurants={sspRestaurantsForMap}
                   selectedRestaurant={selectedRestaurant}
                   onSelectRestaurant={handleSelectRestaurant}
                   doneIds={doneIds}

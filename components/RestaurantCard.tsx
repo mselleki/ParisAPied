@@ -10,6 +10,8 @@ interface RestaurantCardProps {
   index: number;
   isDone: boolean;
   onToggleDone: (e: React.MouseEvent) => void;
+  isInSsp?: boolean;
+  onToggleSsp?: (e: React.MouseEvent) => void;
 }
 
 export default function RestaurantCard({
@@ -19,6 +21,8 @@ export default function RestaurantCard({
   index,
   isDone,
   onToggleDone,
+  isInSsp,
+  onToggleSsp,
 }: RestaurantCardProps) {
   return (
     <motion.div
@@ -45,6 +49,23 @@ export default function RestaurantCard({
             <p className={`text-sm mb-3 leading-relaxed ${isSelected ? "text-white/90" : "text-gray-600"} ${isDone ? "opacity-75" : ""}`}>
               {restaurant.adresse}
             </p>
+            {onToggleSsp && (
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); onToggleSsp(e); }}
+                className={`text-xs px-3 py-1.5 rounded-full font-medium border transition-colors mb-2 ${
+                  isInSsp
+                    ? isSelected
+                      ? "bg-white/20 text-white border-white/30 hover:bg-white/30"
+                      : "bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100"
+                    : isSelected
+                      ? "bg-white/20 text-white border-white/30 hover:bg-white/30"
+                      : "bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-200"
+                }`}
+              >
+                {isInSsp ? "☀️ Dans la Sunny Sunday Party" : "☀️ Ajouter à la Sunny Sunday Party"}
+              </button>
+            )}
             <div className="flex items-center gap-2 flex-wrap">
               <span className={`text-xs px-3 py-1.5 rounded-full font-medium ${
                 isSelected 
